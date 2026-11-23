@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="./image/j.png">
+<title>Just Married 💍 Rosalie & Jecko</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:black;
+  overflow:hidden;
+}
+
+.container{
+  text-align:center;
+  position:relative;
+}
+
+/* ENVELOPE */
+.envelope{
+  position:relative;
+  width:280px;
+  height:180px;
+  margin:auto;
+  transition:0.8s ease;
+}
+
+.envelope-body{
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:#fff;
+  border-radius:10px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.1);
+  z-index:1;
+}
+
+.envelope-flap{
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:#8a8a8a;
+  clip-path:polygon(0 0,100% 0,50% 60%);
+  border-radius: 2px;
+  transform-origin:top;
+  transition:0.4s;
+  top: .2px;
+  z-index:2;
+}
+
+.envelope.open .envelope-flap{
+  transform:rotateX(120deg);
+}
+
+/* BUTTON */
+.hold-btn{
+  position:absolute;
+  top:95px;
+  left:50%;
+  transform:translateX(-50%);
+  padding:12px 25px;
+  border:none;
+  border-radius:30px;
+  background:#000000;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  z-index:10;
+  box-shadow:0 5px 15px rgba(0, 0, 0, 0.4);
+  transition:0.5s ease;
+}
+
+.hold-btn.hide{
+  opacity:0;
+  transform:translateX(-50%) translateY(-20px);
+  pointer-events:none;
+}
+
+/* STATUS */
+.status{
+  margin-top:25px;
+  color:#ffffff;
+}
+
+/* HEART */
+.heart{
+  position:absolute;
+  color:black;
+  font-size:20px;
+  animation:floatUp 1s linear forwards;
+}
+
+@keyframes floatUp{
+  0%{transform:translateY(0); opacity:1;}
+  100%{transform:translateY(-200px); opacity:0;}
+}
+
+/* CONFETTI */
+.confetti{
+  position:absolute;
+  width:8px;
+  height:8px;
+  background:black;
+  top:50%;
+  left:50%;
+  animation:fall 3s linear forwards;
+}
+
+@keyframes fall{
+  0%{transform:translate(0,0) rotate(0deg); opacity:1;}
+  100%{transform:translate(var(--x),600px) rotate(720deg); opacity:0;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <button class="hold-btn" id="holdBtn">HOLD ❤️</button>
+
+  <div class="envelope" id="envelope">
+    <div class="envelope-flap"></div>
+    <div class="envelope-body"></div>
+  </div>
+
+  <p class="status" id="status">Thank you for celebrating with us Please Hold 💌</p>
+</div>
+
+<script>
+const holdBtn = document.getElementById("holdBtn");
+const envelope = document.getElementById("envelope");
+const statusText = document.getElementById("status");
+
+let timer;
+let isHolding = false;
+const HOLD_TIME = 100;
+
+/* HEARTS */
+function createHeart(){
+  const heart = document.createElement("div");
+  heart.className = "heart";
+  heart.innerText = "💖";
+  heart.style.left = Math.random() * window.innerWidth + "px";
+  heart.style.top = window.innerHeight + "px";
+  document.body.appendChild(heart);
+
+  setTimeout(()=>heart.remove(),4000);
+}
+
+/* CONFETTI */
+function createConfetti(){
+  for(let i=0;i<40;i++){
+    const conf = document.createElement("div");
+    conf.className = "confetti";
+    conf.style.left = Math.random()*window.innerWidth + "px";
+    conf.style.top = "-10px";
+    conf.style.setProperty("--x",(Math.random()*200-100)+"px");
+    conf.style.background = ["#FFFFFF","#FFFFFF","#E1DCC9","#B0E4CC"][Math.floor(Math.random()*4)];
+    document.body.appendChild(conf);
+
+    setTimeout(()=>conf.remove(),3000);
+  }
+}
+
+function startHold(e){
+  e.preventDefault();
+  if(isHolding) return;
+
+  isHolding = true;
+  statusText.innerText = "💖";
+
+  envelope.classList.add("open");
+
+  timer = setTimeout(()=>{
+    statusText.innerText = "Love unlocked 💍";
+
+    createConfetti();
+    let heartInterval = setInterval(createHeart,200);
+
+    envelope.style.transform = "translateY(-120px) scale(0.8)";
+    envelope.style.opacity = "0";
+    holdBtn.classList.add("hide");
+
+    setTimeout(()=>{
+      clearInterval(heartInterval);
+
+      // ✅ allow success page only for this session
+      sessionStorage.setItem("justMarriedSuccess", "true");
+
+      window.location.href = "mainpage.html";
+    },1200);
+
+  }, HOLD_TIME);
+}
+
+function cancelHold(){
+  if(!isHolding) return;
+
+  isHolding = false;
+  clearTimeout(timer);
+
+  envelope.classList.remove("open");
+  statusText.innerText = "Hold to open 💌";
+}
+
+holdBtn.addEventListener("pointerdown", startHold);
+holdBtn.addEventListener("pointerup", cancelHold);
+holdBtn.addEventListener("pointerleave", cancelHold);
+holdBtn.addEventListener("pointercancel", cancelHold);
+</script>
+
+</body>
+</html>
